@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MultiMegafon3</string>
+    <string name="nadawanie_button_text">Chcę coś ogłosić</string>
+    <string name="odbieranie_button_text">Chciałbym kogoś posłuchać</string>
+    <string name="main_text">Co chciałbyś zrobić?</string>
+    <string name="scan_button">Odśwież listę serwerów</string>
+    <string name="go_to_selected_button">Zacznij słuchać</string>
+</resources>
