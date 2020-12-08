@@ -35,7 +35,7 @@
         android:id="@+id/odbieranieButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="moveToOdbieranieActivity"
+        android:onClick="moveToWyborServeraActivity"
         android:text="@string/odbieranie_button_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MultiMegafon3</string>
+    <string name="app_name">MultiMegafon</string>
     <string name="nadawanie_button_text">Chcę coś ogłosić</string>
     <string name="odbieranie_button_text">Chciałbym kogoś posłuchać</string>
     <string name="main_text">Co chciałbyś zrobić?</string>

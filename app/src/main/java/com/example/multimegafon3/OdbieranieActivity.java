@@ -11,7 +11,9 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -28,17 +30,16 @@ public class OdbieranieActivity extends AppCompatActivity {
     private int port = 4003;
     private MulticastSocket receivingSocket;
 
-    private static final int SAMPLE_RATE = 44100;
+    private static final int SAMPLE_RATE = 8000;
     private static final int CHANNEL = AudioFormat.CHANNEL_OUT_MONO;
     private static final int FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-    private static int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, FORMAT);
-    int bufferSize = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+    private static int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, 1, FORMAT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_odbieranie);
-        serversAddress = "239.168.0.60";
+        serversAddress = "239.168.0.192";
         receiveAndPlayAudioStream();
     }
 
@@ -55,24 +56,48 @@ public class OdbieranieActivity extends AppCompatActivity {
     }
 
     private class receiveAndPlayAudio implements  Runnable{
+        /*/TAKE 2.0/
+        public void run(){
+            try{
+                InetAddress serverAddr = InetAddress.getByName(serversAddress);
+                receivingSocket = new MulticastSocket(port);
+                receivingSocket.joinGroup(serverAddr);
+
+                byte [] audioBuffer = new byte[BUFFER_SIZE];
+                BufferedInputStream myBis = new BufferedInputStream();
+                DataInputStream myDis = new DataInputStream(myBis);
+            }
+            catch(UnknownHostException eUHE){
+                eUHE.printStackTrace();
+            }
+            catch(IOException eIOE ){
+                eIOE.printStackTrace();
+            }
+        }
+        */
         public void run(){
             Log.d(TAG, "Jestem w threadzie odbierania");
             try {
                 InetAddress serverAddr = InetAddress.getByName(serversAddress);
                 receivingSocket = new MulticastSocket(port);
                 receivingSocket.joinGroup(serverAddr);
-                byte [] audioBuffer = new byte[4096];
+                byte [] audioBuffer = new byte[BUFFER_SIZE];
                 DatagramPacket recvDatagram = new DatagramPacket(audioBuffer, audioBuffer.length);
-                //Does not compile -> Problem with configuration.
-                AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+
+                //CHANNEL_CONFIGURATION_MONO
+                //AudioTrack at = new AudioTrack(AudioManager.STREAM_MUSIC, 44100, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 640, AudioTrack.MODE_STREAM);
+                AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, CHANNEL,FORMAT, BUFFER_SIZE, AudioTrack.MODE_STREAM);
+                audioTrack.play();
+
                 while(isReceivingAudio){
                     Log.d(TAG, "Czekam na wiadomosc");
                     receivingSocket.receive(recvDatagram);
-                    Log.d(TAG, "Otrzymalem wiadomosc");
-                    Log.d(TAG, "odbieranko" + recvDatagram.getData());
-                    audioTrack.play();
-                    audioTrack.write(audioBuffer, 0, audioBuffer.length);
+                    recvDatagram.getData();
+                    //Log.d(TAG, "odbieranko " + new String(recvDatagram.getData()));
+                    audioTrack.write(recvDatagram.getData(), 0, audioBuffer.length);
                 }
+
+
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -80,5 +105,6 @@ public class OdbieranieActivity extends AppCompatActivity {
             }
         }
     }
+
 
 }

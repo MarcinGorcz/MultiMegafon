@@ -23,6 +23,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class NadawanieActivity extends AppCompatActivity {
@@ -36,8 +37,9 @@ public class NadawanieActivity extends AppCompatActivity {
     MulticastSocket multicastAnnounceSocket = null;
     InetAddress groupStream = null;
     MulticastSocket multicastStreamSocket = null;
-    private static final int RECORDING_RATE = 44100;
+    private static final int RECORDING_RATE = 8000;
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
+    //private static final int FORMAT = AudioFormat.ENCODING_PCM_8BIT;
     private static final int FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private static int BUFFER_SIZE = AudioRecord.getMinBufferSize(RECORDING_RATE, CHANNEL, FORMAT);
     private AudioRecord recorder;
@@ -145,20 +147,22 @@ public class NadawanieActivity extends AppCompatActivity {
                     groupStream = InetAddress.getByName(myMulticastAddress);
                     multicastStreamSocket = new MulticastSocket(port);
                     multicastStreamSocket.joinGroup(groupStream);
-                    byte[] buffer = new byte[BUFFER_SIZE];
                     DatagramPacket packet;
-                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, RECORDING_RATE, CHANNEL, FORMAT, BUFFER_SIZE * 10);
+                    recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, RECORDING_RATE, CHANNEL, FORMAT, BUFFER_SIZE);
+                    byte[] audioBuffer = new byte[BUFFER_SIZE];
                     recorder.startRecording();
-                    Log.d(TAG, "I am streaming Audio.");
+                    int readStatus = 0;
                     while(isStreamingAudio){
-                        Log.d(TAG, "Nadaje");
-                        int read = recorder.read(buffer, 0, buffer.length);
-                        packet = new DatagramPacket(buffer, read,  groupStream, port);
+                        readStatus = recorder.read(audioBuffer,0,audioBuffer.length);
+                        Log.d(TAG,"ResultOfRead: " + readStatus);
+                        packet = new DatagramPacket(audioBuffer, readStatus,  groupStream, port);
                         multicastStreamSocket.send(packet);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            recorder.stop();
+            recorder.release();
         }
     }
 
