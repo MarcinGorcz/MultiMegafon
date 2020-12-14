@@ -9,24 +9,19 @@ import android.media.AudioTrack;
 import android.os.Bundle;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class OdbieranieActivity extends AppCompatActivity {
     private static String TAG = "Odbieranie";
     private boolean isReceivingAudio = false;
 
-    private String serversAddress = null;
+    private String serversMulticastAddress = null;
+    private String serversIpAddress = null;
+
     private int port = 4003;
     private MulticastSocket receivingSocket;
 
@@ -34,18 +29,26 @@ public class OdbieranieActivity extends AppCompatActivity {
     private static final int CHANNEL = AudioFormat.CHANNEL_OUT_MONO;
     private static final int FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private static int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE, 1, FORMAT);
-
+    private String chosenServer = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        chosenServer = getIntent().getStringExtra("ChosenServer");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_odbieranie);
-        serversAddress = "239.168.0.192";
+        //serversMulticastAddress = "239.168.0.192";
+        setServersAddress();
         receiveAndPlayAudioStream();
     }
 
     protected void onDestroy() {
         super.onDestroy();
         isReceivingAudio = false;
+    }
+
+    private void setServersAddress(){
+        String[] addressesSplitted = chosenServer.split(";");
+        serversMulticastAddress = addressesSplitted[0];
+        serversIpAddress = addressesSplitted[1];
     }
 
     private void receiveAndPlayAudioStream(){
@@ -55,30 +58,21 @@ public class OdbieranieActivity extends AppCompatActivity {
         new Thread(rapa).start();
     }
 
-    private class receiveAndPlayAudio implements  Runnable{
-        /*/TAKE 2.0/
-        public void run(){
-            try{
-                InetAddress serverAddr = InetAddress.getByName(serversAddress);
-                receivingSocket = new MulticastSocket(port);
-                receivingSocket.joinGroup(serverAddr);
+    private void startQualityVerification(){
 
-                byte [] audioBuffer = new byte[BUFFER_SIZE];
-                BufferedInputStream myBis = new BufferedInputStream();
-                DataInputStream myDis = new DataInputStream(myBis);
-            }
-            catch(UnknownHostException eUHE){
-                eUHE.printStackTrace();
-            }
-            catch(IOException eIOE ){
-                eIOE.printStackTrace();
-            }
+    }
+
+    private class checkConnectionQuality implements  Runnable {
+        public void run(){
+
         }
-        */
+    }
+
+    private class receiveAndPlayAudio implements  Runnable{
         public void run(){
             Log.d(TAG, "Jestem w threadzie odbierania");
             try {
-                InetAddress serverAddr = InetAddress.getByName(serversAddress);
+                InetAddress serverAddr = InetAddress.getByName(serversMulticastAddress);
                 receivingSocket = new MulticastSocket(port);
                 receivingSocket.joinGroup(serverAddr);
                 byte [] audioBuffer = new byte[BUFFER_SIZE];

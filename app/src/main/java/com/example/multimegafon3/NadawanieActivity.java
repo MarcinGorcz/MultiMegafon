@@ -31,6 +31,7 @@ public class NadawanieActivity extends AppCompatActivity {
     private boolean isMulticastingReadiness = false;
     private boolean isStreamingAudio = false;
     private String myMulticastAddress = "";
+    private String myIpAddress ="";
     private String defaultMulticastAddress = "238.238.238.238";
     private int port = 4003;
     InetAddress groupAnnounce = null;
@@ -52,6 +53,7 @@ public class NadawanieActivity extends AppCompatActivity {
         askForAccessToMicrophone();
         askForAccessToWifi();
         getMulticastAddress();
+        getIpAddress();
         try {
             announceMulticastReadiness();
         } catch (IOException e) {
@@ -108,6 +110,13 @@ public class NadawanieActivity extends AppCompatActivity {
         Log.d(TAG, "Multicast address set to: " + myMulticastAddress);
     }
 
+    private void getIpAddress(){
+        WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo info = manager.getConnectionInfo();
+        String address = Formatter.formatIpAddress(info.getIpAddress());
+        myIpAddress = address;
+    }
+
     private void startStreamingAudio(){
         isStreamingAudio = true;
         streamingThread sa = new streamingThread();
@@ -120,7 +129,7 @@ public class NadawanieActivity extends AppCompatActivity {
                 groupAnnounce = InetAddress.getByName(defaultMulticastAddress);
                 multicastAnnounceSocket = new MulticastSocket(port);
                 multicastAnnounceSocket.joinGroup(groupAnnounce);
-                String announcingDatagramMsg = myMulticastAddress;
+                String announcingDatagramMsg = myMulticastAddress + ";" + myIpAddress;
                 byte[] announcingDatagramByte = announcingDatagramMsg.getBytes();
                 DatagramPacket announcingDatagram = new DatagramPacket(announcingDatagramByte,announcingDatagramByte.length,groupAnnounce,port);
 
