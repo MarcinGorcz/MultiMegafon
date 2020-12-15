@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
@@ -90,9 +91,17 @@ public class WyborServeraActivity extends AppCompatActivity {
     }
 
     public void moveToOdbieranie(View view) {
-        chosenServer = detectedServers.get(recyclerViewAdapter.getLastSelectedPosition());
-        Log.d(TAG,"Wybrany serwer to: " + chosenServer);
-        if(chosenServer!=null) {
+
+        if(recyclerViewAdapter.getLastSelectedPosition()>-1){
+            chosenServer = detectedServers.get(recyclerViewAdapter.getLastSelectedPosition());
+            Log.d(TAG,"Wybrany serwer to: " + chosenServer);
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "Proszę wybrać serwer", Toast.LENGTH_SHORT).show();
+        }
+
+
+        if(chosenServer!=null){
             Intent intent = new Intent(this, OdbieranieActivity.class);
             intent.putExtra("ChosenServer", chosenServer);
             startActivity(intent);
